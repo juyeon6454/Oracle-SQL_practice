@@ -253,3 +253,564 @@ WHERE HIRE_DATE <= '2003/12/31' ;
 
 SELECT PHONE_NUMBER FROM EMPLOYEES;
 
+select count(*), count(commission_pct) from employees;
+
+select count(*), sum(salary), avg(salary) from employees;
+
+select count(*), sum(salary), avg(nvl(salary,0)) from employees;
+
+select count(*), max(salary), min(salary) from employees;
+
+select avg(e.salary) from employees e order by department_ID;
+
+select avg(e.salary) from employees e GROUP by department_ID;
+--어떤 부서의 평균인지 그룹으로 묶어서 직계함수와 사용하기 위함?
+
+select department_id, job_id, count(*), sum(salary)
+from employees
+group by department_id, job_id;
+
+select department_id, count(*), sum(salary)
+from employees
+group by department_id
+having sum(salary) > 20000;
+
+select department_id, count(*), sum(salary)
+from employees
+group by department_id
+having sum(salary) > 20000
+and department_id = 100;
+
+--문제 1. 
+--직-원중에 최고임금(salary)과  최저임금을 “최고임금, “최저임금”프로젝션 타이틀로 함께 출력해 보세요. 
+--두 임금의 차이는 얼마인가요?  “최고임금 ? 최저임금”이란 타이틀로 함께 출력해 보세요.
+select count(*), max(salary)"최고임금", min(salary)"최저임금" ,
+max(salary) - min(salary) "최고임금 - 최저임금" from employees;
+
+
+--문제2.
+--마지막으로 신입사원이 들어온 날은 언제 입니까? 다음 형식으로 출력해주세요.
+--예) 2014년 07월 10일
+
+select to_char(max(hire_date), 'yyyy"년" mm"월" dd"월"')
+from employees;
+
+
+--문제3.
+--부서별로 평균임금, 최고임금, 최저임금을 부서(department_id)와 함께 출력하고 정렬순서는
+--부서번호(department_id) 내림차순입니다.
+SELECT e.DEPARTMENT_ID "부서", 
+    avg(NVL(e.SALARY, 0)) "평균임금",
+    MAX(e.SALARY) "최고임금",
+    MIN(e.SALARY) "최저임금"
+FROM EMPLOYEES e
+GROUP BY e.DEPARTMENT_ID
+ORDER BY e.DEPARTMENT_ID DESC;
+
+--문제4.
+--업무(job_id)별로 평균임금, 최고임금, 최저임금을 업무(job_id)와 함께 출력하고 정렬순서는 업무(job_id) 내림차순입니다.
+select job_id, avg(salary), max(salary), min(salary)
+--round(avg(salary),2)) / avg(nvl(e.salary,0))
+from employees
+group by job_id
+order by job_id desc;
+
+
+--문제5.
+--가장 오래 근속한 직원의 입사일은 언제인가요? 다음 형식으로 출력해주세요.
+--예) 2014년 07월 10일
+select to_char(min(hire_date), 'yyyy"년" mm"월" dd"월"')
+from employees;
+
+--문제6.
+--평균임금과 최저임금의 차이가 2000 미만인 부서(department_id), 평균임금, 최저임금 그리고 (평균임금 ? 최저임금)를 (평균임금 ? 최저임금)의 내림차순으로 정렬해서 출력하세요.
+SELECT
+    DEPARTMENT_ID "부서",
+    ROUND(AVG(NVL(SALARY, 0)),2) "평균임금" ,
+    MIN(SALARY) "최저임금",
+    ROUND(AVG(NVL(SALARY, 0)) - MIN(SALARY),2) "평균임금 - 최저임금"
+FROM
+    EMPLOYEES
+GROUP BY
+    DEPARTMENT_ID
+HAVING
+     AVG(NVL(SALARY, 0)) - MIN(SALARY) < 2000
+ORDER BY
+     4 DESC ;
+
+--문제7.
+--업무(Job_id)별로 최고임금과 최저임금의 차이를 출력해보세요.
+--차이를 확인할 수 있도록 내림차순으로 정렬하세요? 
+
+select job_id, max(salary) - min(salary)
+from employees
+group by job_id
+order by max(salary) - min(salary) desc;
+
+
+
+SELECT employee_id, 
+        salary,
+        job_id,
+        CASE WHEN job_id = 'AC_ACCOUNT' THEN salary + salary * 0.1
+             WHEN job_id = 'AC_MGR' THEN salary + salary *0.2
+             ELSE salary
+        END salary
+FROM employees;
+
+
+--직원의 이름, 부서, 팀을 출력하세요
+--팀은 부서코드로 결정하며 부서코드가 10~50 이면 ‘A-TEAM’
+--60~100이면 ‘B-TEAM’ 110~150이면 ‘C-TEAM’ 나머지는 ‘팀없음’ 으로 출력하세요
+
+select first_name, department_id, 
+case when department_id between 10 and 50 then 'A-TEAM'
+     when department_id between 60 and 100 then 'B-TEAM'
+     when department_id between 110 and 150 then 'C-TEAM'
+     else '팀없음'                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+end "team"
+from employees;
+
+-----------------------------join---------------------------------------
+
+select count(*)
+from employees, departments;
+
+select first_name, department_name
+from employees, departments;
+
+select first_name, em.department_id, 
+    department_name, de.department_id
+from employees em, departments de
+where em.department_id = de.department_id;
+
+
+--[예제]
+--직원의 이름, 직급명칭을 출력하세요
+--Join 할 테이블 ( Employees, Jobs )
+
+SELECT e.FIRST_NAME, j.JOB_ID, j.JOB_TITLE
+FROM EMPLOYEES e , JOBS j
+WHERE e.JOB_I  = j.JOB_ID ;
+
+SELECT first_name, em.department_id, department_name, de.department_id
+from employees em, departments de
+where em.department_id = de.department_id;
+
+--[예제] 모든 직원이름, 부서이름, 업무명 을 출력하세요
+select *
+FROM EMPLOYEES e , DEPARTMENTS d, JOBS j
+WHERE e.DEPARTMENT_ID = d.DEPARTMENT_ID
+AND e.JOB_ID = j.job_ID;
+--AND e.FIRST_NAME LIKE '%S%';
+
+
+--=====================================================================
+
+
+SELECT el.first_name, e2.first_name
+from employees el, employees e2
+where el.manager_id = e2.employee_id
+order by 1;
+
+select e.department_id, e.first_name, d.department_name
+from employees e full outer join departments d
+on e.department_id = d.department_id ; 
+
+--문제 1. 
+--각 사원(employee)에 대해서 사번(employee_id), 이름(first_name), 부서명(department_name), 매니저(manager)의 이름(first_name)을 조회하세요.
+
+SELECT 
+    e.EMPLOYEE_ID "사번", 
+    e.FIRST_NAME "이름", 
+    d.DEPARTMENT_NAME "부서명", 
+    m.FIRST_NAME "매니저 이름"
+FROM 
+    EMPLOYEES e, 
+    EMPLOYEES m , 
+    DEPARTMENTS d
+WHERE 
+    e.DEPARTMENT_ID = d.DEPARTMENT_ID 
+    AND e.MANAGER_ID = m.EMPLOYEE_ID ;
+
+--문제2.
+--지역(regions)에 속한 나라들을 지역이름(region_name), 나라이름(country_name)으로 출력하되 지역이름, 나라이름 순서대로 내림차순으로 정렬하세요.
+--//25개국
+
+SELECT
+    r.REGION_NAME "지역이름",
+    c.COUNTRY_NAME "나라이름"
+FROM 
+    REGIONS r,
+    countries c
+WHERE 
+    r.REGION_ID= c.REGION_ID
+ORDER BY
+    1 DESC,2 DESC;
+
+--문제3.
+--각 부서(department)에 대해서 부서번호(department_id), 부서이름(department_name),
+-- 매니저(manager)의 이름(first_name), 위치(locations)한 도시(city), 나라(countries)의 이름(countries_name) 
+--그리고 지역구분(regions)의 이름(region_name)까지 전부 출력해 보세요.
+--//11개
+SELECT
+    d.DEPARTMENT_ID "부서번호" ,
+    d.DEPARTMENT_NAME "부서이름" ,
+    e.FIRST_NAME "매니저의 이름" ,
+    l.CITY "위치한 도시" ,
+    c.COUNTRY_NAME "나라의 이름" ,
+    r.REGION_NAME "지역구분 이름"
+FROM
+    DEPARTMENTS d ,
+    EMPLOYEES e,
+    LOCATIONS l,
+    COUNTRIES c,
+    REGIONS r
+WHERE
+    d.MANAGER_ID = e.EMPLOYEE_ID
+    AND d.LOCATION_ID = l.LOCATION_ID
+    AND l.COUNTRY_ID = c.COUNTRY_ID
+    AND c.REGION_ID = r.REGION_ID ;
+    
+    
+--문제4.
+--‘Public Accountant’의 직책(job_title)으로 과거에 근무한 적이 있는 모든 사원의 사번과 이름을 출력하세요. (현재 ‘Public Accountant’의 직책(job_title)으로 근무하는 사원은 고려하지 않습니다.) 이름은 first_name과 last_name을 합쳐 출력합니다.
+--//2명
+SELECT
+    e.EMPLOYEE_ID ,
+    e.FIRST_NAME || ' ' || e.LAST_NAME
+FROM 
+    EMPLOYEES e , JOB_HISTORY jh, JOBS j
+WHERE
+    e.EMPLOYEE_ID = jh.EMPLOYEE_ID
+    AND jh.JOB_ID = j.JOB_ID
+    AND j.JOB_TITLE = 'Public Accountant';
+
+--문제5.
+--직원들의 사번(employee_id), 이름(first_name), 성(last_name)과 부서 이름(department_name)을 조회하여 성(last_name)순서로 오름차순 정렬하세요
+--//106 명  (+  부서가 없는 사람도 조회 되도록.. 107명)
+SELECT
+    e.EMPLOYEE_ID,
+    e.FIRST_NAME,
+    e.LAST_NAME,
+    d.DEPARTMENT_NAME
+FROM 
+    EMPLOYEES e ,
+    DEPARTMENTS d 
+WHERE 
+    e.DEPARTMENT_ID = d.DEPARTMENT_ID(+) 
+ORDER BY 3;
+
+--문제6.
+--자신의 매니저보다 채용일(hire_date)이 빠른 사원의 사번(employee_id), 성(last_name)과 채용일(hire_date)을 조회하세요 
+--// 37 명
+
+SELECT
+    emp.EMPLOYEE_ID ,
+    emp.LAST_NAME ,
+    emp.HIRE_DATE ,
+    mgr.HIRE_DATE "매니저 입사일"
+FROM EMPLOYEES emp, EMPLOYEES mgr
+WHERE emp.MANAGER_ID = mgr.EMPLOYEE_ID
+AND emp.HIRE_DATE < mgr.HIRE_DATE ;
+
+--=======================================================================================
+
+SELECT *
+FROM EMPLOYEES e
+WHERE e.SALARY = (SELECT SALARY
+FROM EMPLOYEES
+WHERE FIRST_NAME ='Den');
+
+SELECT FIRST_NAME, SALARY, EMPLOYEE_ID
+FROM EMPLOYEES
+WHERE SALARY = (SELECT MIN(SALARY) FROM EMPLOYEES);
+
+
+-- 평균 급여보다 적게 받는 사람의 이름, 급여를 출력하세요
+SELECT FIRST_NAME || ' ' || LAST_NAME "이름", SALARY "급여",  EMPLOYEE_ID "사원번호"
+FROM EMPLOYEES
+WHERE SALARY < (SELECT AVG(NVL(SALARY,0)) FROM EMPLOYEES);
+
+
+-- 각 부서별로 최고급여를 받는 사원을 출력하세요
+SELECT 
+    DEPARTMENT_ID, 
+    EMPLOYEE_ID, 
+    FIRST_NAME, 
+    SALARY
+FROM 
+    EMPLOYEES
+WHERE
+    (DEPARTMENT_ID, SALARY) 
+IN 
+    (SELECT DEPARTMENT_ID, MAX(SALARY)
+FROM 
+    EMPLOYEES 
+GROUP BY 
+    DEPARTMENT_ID);
+    
+    
+--  각 부서별로 최고급여를 받는 사원을 출력하세요 ?(테이블에서 조인)
+
+select 
+    e.department_id, 
+    e.employee_id, 
+    e.first_name, 
+    e.salary
+from 
+    employees e, (select department_id, max(salary) salary 
+    from employees
+    group by department_id) s 
+where 
+    e.department_id = s.department_id
+and 
+    e.salary = s.salary; 
+
+
+--문제1
+-- 평균 급여보다 적은 급여를 받는 직원은 몇 명이나 있습니까? //56명
+
+SELECT 
+    FIRST_NAME,
+    
+    
+--문제2
+--각 부서별로 최고의 급여를 받는 사원의 직원번호(employee_id),성(last_name)과 
+--급여(salary) 부서번호(department_id)를 조회하세요.
+--단 조회 결과는 급여의 내림차순으로 정렬되어 나타나야합니다. //11명
+
+SELECT 
+    e.EMPLOYEE_ID, 
+    e.LAST_NAME,
+    e.SALARY,
+    d.DEPARTMENT_ID
+FROM 
+    EMLOYEES e,
+    DEPARTMENT d
+WHERE
+    e.department_id = s.department_id;
+
+--문제3
+--각 업무(job) 별로 급여(salary)의 총합을 구하고자 합니다. 급여 총합이 가장 높은
+-- 업무부터 업무명(job_titile)과 급여 총합을 조회하시오 //19 직급
+
+SELECT
+    j.JOB_TITLE, 
+    s.SALARY
+FROM
+    JOBS j ,
+    (
+    SELECT
+        JOB_ID,
+        sum(salary) SALARY
+    FROM
+        EMPLOYEES
+    GROUP BY
+        JOB_ID ) s
+WHERE
+    j.JOB_ID = s.job_id
+ORDER BY    
+    s.SALARY DESC ;
+    
+    --
+    
+SELECT e.JOB_ID , sum(e.SALARY)
+FROM EMPLOYEES e 
+GROUP BY e.JOB_ID ;
+
+SELECT j.JOB_TITLE , js.sal
+FROM JOBS j , (SELECT e.JOB_ID , sum(e.SALARY) sal
+				FROM EMPLOYEES e 
+				GROUP BY e.JOB_ID ) js
+WHERE j.JOB_ID = js.JOB_ID
+ORDER BY 2 desc;
+
+SELECT j.JOB_TITLE, sum(e.SALARY)
+FROM EMPLOYEES e , JOBS j 
+WHERE e.JOB_ID  = j.JOB_ID 
+GROUP BY j.JOB_TITLE  
+ORDER BY 2 desc;
+
+
+--문제4
+-- 자신의 부서 평균 급여보다 급여(salary)가 많은 직원의 직원번호(employee_id)
+--성(last_name)과 급여(salary)을 조회하세요 //38명
+
+SELECT
+    e.EMPLOYEE_ID ,
+    e.LAST_NAME ,
+    e.SALARY ,
+    s.SALARY "부서평균"
+FROM
+    EMPLOYEES e ,
+    (SELECT DEPARTMENT_ID , AVG(NVL(SALARY, 0)) SALARY
+    FROM EMPLOYEES e
+    GROUP BY DEPARTMENT_ID) s
+WHERE
+    e.DEPARTMENT_ID = s.DEPARTMENT_ID
+AND
+    e.SALARY > s.SALARY;
+
+--//
+
+SELECT DEPARTMENT_ID , avg(SALARY)
+FROM EMPLOYEES 
+GROUP BY DEPARTMENT_ID ;
+
+SELECT e.EMPLOYEE_ID , e.LAST_NAME , e.SALARY 
+FROM EMPLOYEES e , (SELECT DEPARTMENT_ID , avg(SALARY) sal
+					FROM EMPLOYEES 
+					GROUP BY DEPARTMENT_ID) da
+WHERE e.DEPARTMENT_ID = da.DEPARTMENT_ID
+AND   e.SALARY > da.sal;
+
+--[예제] 급여를 가장 많이 받는 3명의 직원의 이름을 출력하시오 (rownum)
+SELECT 
+    RN,
+    FIRST_NAME,
+    SALARY
+FROM(
+    SELECT
+        ROWNUM RN,
+        FIRST_NAME,
+        SALARY
+    FROM(
+        SELECT FIRST_NAME,
+            SALARY
+                FROM EMPLOYEES
+                ORDER BY SALARY DESC
+         ) 
+     )
+WHERE RN >= 11
+AND RN <= 20 ;
+
+--SQL 실습 문제 혼합
+
+--문제1. 가장 늦게 입사한 직원의 이름(first_name last_name)과
+--연봉(salary)과 근무하는 부서 이름(department_name)은?
+
+SELECT 
+    MAX(e.HIRE_DATE)
+FROM 
+    EMPLOYEES e ;
+
+SELECT 
+    e.FIRST_NAME || ' ' || e.LAST_NAME "이름" ,
+    e.SALARY "연봉", 
+    d.DEPARTMENT_NAME "부서 이름" , 
+    e.HIRE_DATE
+FROM
+    EMPLOYEES e , 
+    DEPARTMENTS d
+WHERE
+    e.HIRE_DATE = (SELECT MAX(e.HIRE_DATE) FROM EMPLOYEES e)
+AND
+    e.DEPARTMENT_ID = d.DEPARTMENT_ID;
+
+
+--문제2. 평균 급여(salary)가 가장 높은 부서 직원들의 직원번호(employee_id),
+--이름(first_name), 성(last_name)과 업무(job_title), 급여(salary)을 조회하시오.
+
+SELECT 
+    e.EMPLOYEE_ID ,
+    e.FIRST_NAME ,
+    e.LAST_NAME ,
+    e.SALARY ,
+    j.JOB_TITLE ,
+    s.AVERAGE
+FROM
+    EMPLOYEES e ,
+    JOBS j ,
+    (SELECT DEPARTMENT_ID , AVG(NVL(SALARY, 0)) AVERAGE
+    FROM EMPLOYEES 
+    GROUP BY DEPARTMENT_ID) s
+    --ORDER BY 2 DESC) s
+WHERE 
+    e.JOB_ID = j.JOB_ID
+    AND
+        e.DEPARTMENT_ID = s.DEPARTMENT_ID
+    AND 
+        s.AVERAGE = (SELECT MAX(avg_s)
+            FROM (SELECT DEPARTMENT_ID , AVG(NVL(a.SALARY, 0)) avg_s
+                FROM EMPLOYEES a
+                GROUP BY DEPARTMENT_ID) s);
+    --답 neena / lex/ steven
+    
+    
+
+
+--문제3. 평균급여(salary)가 가장 높은 부서는?
+
+SELECT d.DEPARTMENT_NAME
+FROM DEPARTMENTS d ,
+    (
+    SELECT
+        e.DEPARTMENT_ID did,
+        AVG(e.SALARY) avgsal
+    FROM
+        EMPLOYEES e,
+        DEPARTMENTS d
+    WHERE
+        e.DEPARTMENT_ID = d.DEPARTMENT_ID
+    GROUP BY
+        e.DEPARTMENT_ID ) s
+WHERE d.DEPARTMENT_ID = s.did
+AND s.avgsal = (SELECT MAX(g.avgsal)
+FROM EMPLOYEES e , (SELECT e.DEPARTMENT_ID ,
+AVG(e.SALARY) avgsal
+FROM EMPLOYEES e, DEPARTMENTS d
+WHERE e.DEPARTMENT_ID = d.DEPARTMENT_ID
+GROUP BY e.DEPARTMENT_ID) g )
+GROUP BY d.DEPARTMENT_NAME ;
+
+
+--문제4. 평균급여(salary))가 가장 높은 지역(대륙)은?
+
+
+
+
+--문제5. 평균급여(salary)가 가장 높은 업무는?
+
+
+-- ex2.
+-- 평균급여(salary)가 가장 높은 부서 
+-- 직원들의 직원번호(employee_id), 이름(first_name), 성(last_name)과 
+-- 업무(job_title), 급여(salary)를 조회하시오.
+-- 1. 부서별 평균
+SELECT e.DEPARTMENT_ID , avg(e.SALARY)
+FROM EMPLOYEES e 
+GROUP BY e.DEPARTMENT_ID ;
+-- 2. 부서별 평균의 최대
+SELECT max( avg(e.SALARY) ) 
+FROM EMPLOYEES e 
+GROUP BY e.DEPARTMENT_ID ;
+-- 3. 부서별 평균이 최대인 부서
+SELECT e.DEPARTMENT_ID , avg(e.SALARY)
+FROM EMPLOYEES e 
+GROUP BY e.DEPARTMENT_ID 
+HAVING avg(e.SALARY) = (SELECT max( avg(SALARY) ) 
+						FROM EMPLOYEES 
+						GROUP BY DEPARTMENT_ID);
+-- 4. Join
+SELECT e.EMPLOYEE_ID , e.FIRST_NAME , e.LAST_NAME , j.JOB_TITLE , e.SALARY , e.DEPARTMENT_ID 
+FROM EMPLOYEES e , 
+     JOBS j ,
+     (SELECT e.DEPARTMENT_ID , avg(e.SALARY)
+		FROM EMPLOYEES e 
+		GROUP BY e.DEPARTMENT_ID 
+		HAVING avg(e.SALARY) = (SELECT max( avg(SALARY) ) 
+								FROM EMPLOYEES 
+								GROUP BY DEPARTMENT_ID)
+	 ) ma_dept
+WHERE e.JOB_ID = j.JOB_ID 
+AND   e.DEPARTMENT_ID = ma_dept.DEPARTMENT_ID;
+
+-- 검증 
+SELECT * FROM EMPLOYEES e WHERE e.DEPARTMENT_ID = 90;
+
+
+
+
+
+
