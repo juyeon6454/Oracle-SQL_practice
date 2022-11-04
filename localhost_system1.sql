@@ -1,0 +1,3 @@
+CREATE USER miniproject_3 IDENTIFIED BY 1234;
+
+GRANT RESOURCE, CONNECT TO miniproject_3;
